@@ -13,6 +13,7 @@ class PopupContent extends Model
 
     protected $fillable = [
         'user_id',
+        'website_name',
         'content',
         'type',
     ];

@@ -20,7 +20,6 @@ class CreateTablePopupContent extends Migration
             $table->timestamp('created_at')->nullable();
             $table->timestamp('updated_at')->nullable();
             $table->text('type');
-
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }

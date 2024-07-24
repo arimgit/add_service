@@ -46,7 +46,7 @@ class AuthController extends Controller
 
         Auth::attempt($request->only('email', 'password'));
 
-        return redirect()->route('popup-content.create');
+        return redirect()->route('login');
     }
 
     public function logout(Request $request)

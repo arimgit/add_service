@@ -62,6 +62,9 @@
             // Remove the temporary textarea
             document.body.removeChild(tempTextArea);
         });
+        
+</script>
+
     </script>
     
 </body> 
