@@ -19,7 +19,7 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
 
         if (Auth::attempt($credentials)) {
-            return redirect()->route('popup-content.create');
+            return redirect()->route('ad_web_manage_popup');
         }
 
         return redirect()->back()->withErrors(['email' => 'Invalid credentials.']);

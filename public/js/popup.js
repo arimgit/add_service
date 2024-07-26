@@ -88,7 +88,7 @@
             const src = scripts[0].src;
             const urlParams = new URL(src).searchParams;
             const encodedAttr = urlParams.get('attr');
-            return encodedAttr ? atob(encodedAttr) : null;
+            return encodedAttr ? (encodedAttr) : null;
         }
         return null;
     }

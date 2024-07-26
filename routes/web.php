@@ -15,25 +15,21 @@ use App\Http\Controllers\AuthController;
 |
 */
 
-/*Route::get('/', function () {
-    return view('popup-content.popup');
-});*/
-// Route to show the preview popup
+// AUTH ROUTER
 Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout.post');
 Route::middleware('auth')->group(function () {
-    Route::get('/popup-content/create', [PopupContentController::class, 'create'])->name('popup-content.create');
+    Route::get('/manage/popup/{popupId?}', [PopupContentController::class, 'managePopup'])->name('ad_web_manage_popup');
     Route::post('/popup-content/store', [PopupContentController::class, 'store'])->name('popup-content.store');
 });
+
+// WEB ROUTER
+Route::get('/list/popup', [PopupContentController::class, 'listPopup'])->name('ad_web_list_popup');
 Route::get('/popup-data/{popid}', [PopupContentController::class, 'getPopupData']);
-Route::post('api/save-popup-data', [PopupContentController::class, 'savePopupData']);
-Route::get('/website-options', [PopupContentController::class, 'index'])->name('website-options');
 Route::get('/popup-content/{id}', [PopupContentController::class, 'showPopupContent']);
 
-
-
-
-
+// API ROUTER
+Route::post('api/save-popup-data', [PopupContentController::class, 'savePopupData']);

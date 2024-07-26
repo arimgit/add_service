@@ -13,17 +13,11 @@ use Illuminate\Support\Facades\Crypt;
 
 class PopupContentController extends Controller
 {
-    public function create(Request $request)
+    public function managePopup(Request $request, $popupId = -1)
     {
-        $popup = null;
-        $popupId = $request->query('popup_id');
-
-        if ($popupId) {
-            $popup = PopupContent::find($popupId);
-        }
-
-        return view('popup-content.form', compact('popup'));
-   }
+        $popup = PopupContent::find($popupId);
+        return view('popup-content.manage_popup', compact('popup'));
+    }
 
     public function store(Request $request)
     {
@@ -35,12 +29,15 @@ class PopupContentController extends Controller
         $websiteName = $request->input('website_name');
         $headerText = $request->input('header_text');
         $bodyText = $request->input('body_text');
-        $logoPath = 'logos/QMjFxw3Qy226KmFs4kCC4nF5eGMWfY5uj4bEqmYS.jpg';
+
         if ($request->hasFile('header_logo')) {
             $logoPath = $request->file('header_logo')->store('logos', 'public');
+            $logoUrl = asset('storage/' . $logoPath);
+        } else {
+            $logoPath = 'default_storage/building-icon.svg';
+            $logoUrl = asset($logoPath);
         }
 
-        $logoUrl = asset('storage/' . $logoPath);
 
         $popupHtml = "<div id='popupPreview' style='max-width: 400px; margin: 20px auto; background-color: #ffffff; box-shadow: 0 0 10px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; position: relative'>
                         <span style='position: absolute; top: 0px; right: 10px; font-size: 20px; color: #e71e1e; background: #fff; border: none; outline: none;'>&times;</span>
@@ -71,7 +68,7 @@ class PopupContentController extends Controller
             'type' => 'popup',
         ]);
 
-        return redirect()->route('popup-content.create', ['popup_id' => $popup->id]);
+        return redirect()->route('ad_web_manage_popup', ['popup_id' => $popup->id]);
     }
 
     public function getPopupData($popid)
@@ -80,12 +77,13 @@ class PopupContentController extends Controller
         header("Access-Control-Allow-Headers: *");
         header("Access-Control-Allow-Methods: *");
         header("Allow: *");
-        $popup = PopupContent::find($popid);
+
+        $popup = PopupContent::find(Crypt::decryptString($popid));
 
         if (!$popup) {
             return response()->json(['error' => 'Popup not found'], 404);
         }
-        $user_id = $popup->user_id; 
+        $user_id = $popup->user_id;
         $websiteName = $popup->website_name;
         $content = $popup->content;
 
@@ -112,7 +110,7 @@ class PopupContentController extends Controller
             'logo_url' => $logoUrl,
             'body_content' => $bodyContent
         ]);
-    }   
+    }
 
     public function savePopupData(Request $request)
     {
@@ -133,15 +131,17 @@ class PopupContentController extends Controller
         return response()->json(['success' => true, 'data' => $popupFormData]);
     }
 
-    public function index()
+    public function listPopup(Crypt $enc)
     {
         $userId = auth()->id();
         $websites = DB::table('table_popup_content')
             ->where('user_id', $userId)
             ->pluck('website_name', 'id'); // Assuming 'websites' is a column that stores the website name
+            // $enc = new Crypt();
 
-        return view('website_view', [
+        return view('popup-content.list_popup', [
             'websites' => $websites,
+            'enc' => $enc,
         ]);
     }
 
@@ -150,5 +150,4 @@ class PopupContentController extends Controller
         $popup = DB::table('table_popup_content')->find($id);
         return response()->json($popup);
     }
-
 }
