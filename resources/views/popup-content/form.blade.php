@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Create Popup Content</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </head>
 <body style="font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh;">
@@ -63,7 +65,9 @@
         @if($popup)
             <div style="background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); width: 100%; max-width: 400px; margin: auto;">
                 <h2 style="text-align: left; margin-bottom: 20px;">Saved Popup
-                    <button id="copyButton" style="float: right; background-color: #007bff; border: none; color: #fff; padding: 10px 20px; font-size: 16px; border-radius: 4px; cursor: pointer;">Copy</button>
+                <button id="copyButton" style="float: right; background-color: #F3F4F6; border: 1px solid #D1D5DB; color: #111827; padding: 8px 12px; font-size: 16px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                    <i class="fas fa-copy" style="font-size: 18px;"></i> Copy
+                </button>
                 </h2>
                 {!! $popup->content !!}
             </div>
@@ -143,10 +147,8 @@
             // Remove the temporary textarea
             document.body.removeChild(tempTextArea);
         });
-
-        window.Laravel = {
-            csrfToken: '{{ csrf_token() }}'
-        };
+  
     </script>
+    
 </body>
 </html>

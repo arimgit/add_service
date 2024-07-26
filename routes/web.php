@@ -29,7 +29,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/popup-content/store', [PopupContentController::class, 'store'])->name('popup-content.store');
 });
 Route::get('/popup-data/{popid}', [PopupContentController::class, 'getPopupData']);
-Route::post('/save-popup-data', [PopupContentController::class, 'savePopupData']);
+Route::post('api/save-popup-data', [PopupContentController::class, 'savePopupData']);
 Route::get('/website-options', [PopupContentController::class, 'index'])->name('website-options');
 Route::get('/popup-content/{id}', [PopupContentController::class, 'showPopupContent']);
 

@@ -14,11 +14,12 @@ class PopupFormData extends Model
 
     // The attributes that are mass assignable.
     protected $fillable = [
-        'user_id',
         'popup_id',
-        'website_name',
-        'name',
-        'email',
-        'mobile',
+        'host_name',
+        'form_data'
+    ];
+
+    protected $casts = [
+        'form_data' => 'array', // Automatically cast JSON to array
     ];
 }

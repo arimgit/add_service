@@ -22,17 +22,14 @@
                                 <div id='previewBody' style='padding: 20px; text-align: center;'>
                                     <div id='previewContent' style='margin-bottom: 20px;'>${data.body_content}</div>
                                     <form method='post' id='popupForm' style='margin-top: 20px;'>
-                                        <input type='hidden' name='user_id' value='${data.user_id}'>
-                                        <input type='hidden' name='popup_id' value='${data.popup_id}'>
-                                        <input type='hidden' name='website_name' value='${data.websiteName}'>
                                         <div style='margin-bottom: 15px;'>
-                                            <input type='text' name='name' autocomplete='name' style='width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;' placeholder='Name'>
+                                            <input type='text' name='name' autocomplete='name' style='width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;' placeholder='Name' required>
                                         </div>
                                         <div style='margin-bottom: 15px;'>
-                                            <input type='text' name='email' autocomplete='email' style='width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;' placeholder='Email'>
+                                            <input type='text' name='email' autocomplete='email' style='width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;' placeholder='Email' required>
                                         </div>
                                         <div style='margin-bottom: 15px;'>
-                                            <input type='text' name='mobile' autocomplete='mobile' style='width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;' placeholder='Phone'>
+                                            <input type='text' name='mobile' autocomplete='mobile' style='width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;' placeholder='Phone' required>
                                         </div>
                                         <input type='submit' value='Submit' name='save' style='width: 40%; padding: 10px; background-color: #007bff; border: none; color: #fff; font-size: 16px; border-radius: 4px; cursor: pointer;'>
                                     </form>
@@ -42,7 +39,12 @@
 
         document.querySelector('#popupForm').addEventListener('submit', function(event) {
             event.preventDefault();
-            submitForm(new FormData(this));
+            var formData= new FormData(this);
+            formData.append('popup_id',data.popup_id);
+            formData.append('host_name',window.location.origin);
+            var formObject = {};
+            formData.forEach((value, key) => { formObject[key] = value });
+            submitForm(formObject);
         });
 
         const closeButton = document.querySelector('.close-btn');
@@ -54,22 +56,26 @@
         });
     }
 
-    function submitForm(formData) {
+    function submitForm(formObject) {
         
-        fetch('http://127.0.0.1:8000/save-popup-data', {
+        fetch(`http://127.0.0.1:8000/api/save-popup-data`, {
             method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': window.Laravel.csrfToken // Dynamically set CSRF token
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',   
             },
-            body: formData,
+            body: JSON.stringify({
+                popup_id: formObject.popup_id,
+                host_name: formObject.host_name,
+                form_data: formObject
+            }),
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Data saved successfully!');
                 document.getElementById('popupPreview').style.display = 'none';
             } else {
-                alert('An error occurred: ' + data.error);
+                console.log('An error occurred: ' + data.error);
             }
         })
         .catch(error => console.error('Error:', error));

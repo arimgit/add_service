@@ -8,6 +8,7 @@ use App\Models\PopupFormData;
 use Illuminate\Support\Facades\Auth;
 use DOMDocument;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Crypt;
 
 
 class PopupContentController extends Controller
@@ -84,7 +85,7 @@ class PopupContentController extends Controller
         if (!$popup) {
             return response()->json(['error' => 'Popup not found'], 404);
         }
-        $user_id = $popup->user_id;
+        $user_id = $popup->user_id; 
         $websiteName = $popup->website_name;
         $content = $popup->content;
 
@@ -107,8 +108,6 @@ class PopupContentController extends Controller
 
         return response()->json([
             'popup_id' => $popid,
-            'user_id' => $user_id,
-            'websiteName' => $websiteName,
             'header_text' => $headerText,
             'logo_url' => $logoUrl,
             'body_content' => $bodyContent
@@ -117,20 +116,21 @@ class PopupContentController extends Controller
 
     public function savePopupData(Request $request)
     {
-        
         $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'mobile' => 'required|string|max:15',
-            'user_id' => 'required|integer',
-            'popup_id' => 'required|integer',
-            'website_name' => 'required|string|max:255',
+            'popup_id' => 'required|integer|exists:table_popup_content,id',
+            'host_name' => 'required|string',
+            'form_data' => 'required|array',
         ]);
 
-        // Save the data to the database, assuming you have a PopupData model
-        PopupFormData::create($validatedData);
+        // Save the data to the database
+        $popupFormData = PopupFormData::create([
+            'popup_id' => $validatedData['popup_id'],
+            'host_name' => $validatedData['host_name'],
+            'form_data' => $validatedData['form_data'], // Laravel will handle encoding this as JSON
+        ]);
 
-        return response()->json(['success' => true]);
+        // Return a success response
+        return response()->json(['success' => true, 'data' => $popupFormData]);
     }
 
     public function index()
