@@ -23,13 +23,16 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.po
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout.post');
 Route::middleware('auth')->group(function () {
     Route::get('/manage/popup/{popupId?}', [PopupContentController::class, 'managePopup'])->name('ad_web_manage_popup');
-    Route::post('/popup-content/store', [PopupContentController::class, 'store'])->name('popup-content.store');
+    Route::post('/popup/create', [PopupContentController::class, 'create'])->name('ad_web_popup_create');
 });
 
 // WEB ROUTER
 Route::get('/list/popup', [PopupContentController::class, 'listPopup'])->name('ad_web_list_popup');
-Route::get('/popup-data/{popid}', [PopupContentController::class, 'getPopupData']);
-Route::get('/popup-content/{id}', [PopupContentController::class, 'showPopupContent']);
+Route::get('/popup/data/{popId}', [PopupContentController::class, 'getPopupData'])->name('ad_web_popup_data');
+
+Route::post('/toggle/status/{id}', [PopupContentController::class, 'toggleStatus'])->name('ad_web_toggle_status');
+
 
 // API ROUTER
-Route::post('api/save-popup-data', [PopupContentController::class, 'savePopupData']);
+Route::post('api/manage/popup/formdata', [PopupContentController::class, 'managePopupFormData'])->name('api_manage_popup_formdata');
+Route::get('/build/popup/js', [PopupContentController::class, 'buildPopupJs'])->name('build_popup_js');

@@ -17,10 +17,16 @@
             <div style="margin-bottom: 15px;">
                 <label for="email" style="display: block; margin-bottom: 5px; font-weight: bold;">Email:</label>
                 <input type="email" id="email" name="email" required style="width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+                @error('email')
+                    <div style="color: red; margin-top: 5px; font-size: 14px">{{ $message }}</div>
+                @enderror
             </div>
             <div style="margin-bottom: 15px;">
                 <label for="password" style="display: block; margin-bottom: 5px; font-weight: bold;">Password:</label>
                 <input type="password" id="password" name="password" required style="width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+                @error('password')
+                    <div style="color: red; margin-top: 5px; font-size: 14px">{{ $message }}</div>
+                @enderror
             </div>
             <div style="margin-bottom: 15px;">
                 <label for="password_confirmation" style="display: block; margin-bottom: 5px; font-weight: bold;">Confirm Password:</label>

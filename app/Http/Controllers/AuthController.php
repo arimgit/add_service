@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
@@ -17,12 +18,20 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
-
-        if (Auth::attempt($credentials)) {
-            return redirect()->route('ad_web_manage_popup');
+        $user = User::where('email', $credentials['email'])->first();
+        if (!$user) {
+            return back()->withErrors([
+                'email' => 'The email address is incorrect.',
+            ]);
         }
 
-        return redirect()->back()->withErrors(['email' => 'Invalid credentials.']);
+        if (Auth::attempt($credentials)) {
+            return redirect()->route('ad_web_list_popup');
+        }
+
+        return back()->withErrors([
+            'password' => 'The password is incorrect.',
+        ]);
     }
 
     public function showRegistrationForm()

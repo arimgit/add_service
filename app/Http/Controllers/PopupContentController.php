@@ -2,31 +2,62 @@
 
 namespace App\Http\Controllers;
 
+use DOMDocument;
 use Illuminate\Http\Request;
 use App\Models\PopupContent;
 use App\Models\PopupFormData;
 use Illuminate\Support\Facades\Auth;
-use DOMDocument;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Storage;
+
 
 
 class PopupContentController extends Controller
 {
+    public function buildPopupJs(Request $request)
+    {
+        $origin = $request->getSchemeAndHttpHost();
+
+        $popupJs = view('popup-content.build_popup_js', [
+            'origin' => $origin
+        ])->render();
+
+
+        // Write the file to the disk
+        Storage::disk('js')->put("popup.js", $popupJs);
+
+        return response()->json(['message' => 'File written successfully']);
+    }
+
     public function managePopup(Request $request, $popupId = -1)
     {
         $popup = PopupContent::find($popupId);
-        return view('popup-content.manage_popup', compact('popup'));
+        $doc = new \DOMDocument();
+        @$doc->loadHTML($popup->content);
+        $headerText = $doc->getElementById('previewHeaderText')->textContent ?? '';
+        $bodyText = $doc->getElementById('previewContent')->textContent ?? '';
+        $encryptedPopupId = Crypt::encryptString($popupId);
+        return view('popup-content.manage_popup', [
+            'popup' => $popup,
+            'headerText' => $headerText,
+            'bodyText' => $bodyText,
+            'encryptedPopupId' => $encryptedPopupId
+        ]);
     }
 
-    public function store(Request $request)
+    public function create(Request $request)
     {
         $request->validate([
             'website_name' => 'required|string|max:255',
+            'title' => 'required|string|max:255',
             'header_text' => 'required|string|max:255',
             'body_text' => 'required|string',
+            'popup_id' => 'nullable|exists:table_popup_content,id'
         ]);
+        $popupId = $request->input('popup_id');
         $websiteName = $request->input('website_name');
+        $title = $request->input('title');
         $headerText = $request->input('header_text');
         $bodyText = $request->input('body_text');
 
@@ -38,53 +69,50 @@ class PopupContentController extends Controller
             $logoUrl = asset($logoPath);
         }
 
+        $popupHtml = view('popup-content.popup_template', [
+            'headerText' => $headerText,
+            'logoUrl' => $logoUrl,
+            'bodyText' => $bodyText
+        ])->render();
 
-        $popupHtml = "<div id='popupPreview' style='max-width: 400px; margin: 20px auto; background-color: #ffffff; box-shadow: 0 0 10px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; position: relative'>
-                        <span style='position: absolute; top: 0px; right: 10px; font-size: 20px; color: #e71e1e; background: #fff; border: none; outline: none;'>&times;</span>
-                        <header id='previewHeader' style='background-color: #ffffff; padding: 10px; text-align: center;'>
-                            <span id='previewHeaderText'>{$headerText}</span>
-                        </header>
-                        <img id='previewLogo' src='{$logoUrl}' alt='default logo' style='border-radius: 50%; max-height: 50px; display: block; margin: 10px auto;'>
-                        <div id='previewBody' style='padding: 20px; text-align: center;'>
-                            <div id='previewContent' style='margin-bottom: 20px;'>{$bodyText}</div>
-                            <form action='' method='post' style='margin-top: 20px;'>
-                                <div style='margin-bottom: 15px;'>
-                                    <input type='text' name='name' style='width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;' placeholder='Name'>
-                                </div>
-                                <div style='margin-bottom: 15px;'>
-                                    <input type='text' name='email' style='width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;' placeholder='Email'>
-                                </div>
-                                <div style='margin-bottom: 15px;'>
-                                    <input type='text' name='mobile' style='width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;' placeholder='Phone'>
-                                </div>
-                                <input type='button' value='Submit' name='save' style='width: 40%; padding: 10px; background-color: #007bff; border: none; color: #fff; font-size: 16px; border-radius: 4px; cursor: pointer;'>
-                            </form>
-                        </div>
-                     </div>";
-        $popup = PopupContent::create([
-            'user_id' => Auth::id(),
-            'website_name' => $websiteName,
-            'content' => $popupHtml,
-            'type' => 'popup',
-        ]);
+        if ($popupId) {
+            // Update existing popup
+            $popup = PopupContent::find($popupId);
+            if ($popup) {
+                $popup->update([
+                    'website_name' => $websiteName,
+                    'title' => $title,
+                    'content' => $popupHtml,
+                    'type' => 'popup',
+                ]);
+            }
+        } else {
+            // Create new popup
+            $popup = PopupContent::create([
+                'user_id' => Auth::id(),
+                'website_name' => $websiteName,
+                'title' => $title,
+                'content' => $popupHtml,
+                'type' => 'popup',
+            ]);
+        }
 
-        return redirect()->route('ad_web_manage_popup', ['popup_id' => $popup->id]);
+        return redirect()->route('ad_web_manage_popup', ['popupId' => $popup->id]);
     }
 
-    public function getPopupData($popid)
+    public function getPopupData($popId)
     {
         header('Access-Control-Allow-Origin: *');
         header("Access-Control-Allow-Headers: *");
         header("Access-Control-Allow-Methods: *");
         header("Allow: *");
 
-        $popup = PopupContent::find(Crypt::decryptString($popid));
+        $popup = PopupContent::find(Crypt::decryptString($popId));
 
         if (!$popup) {
             return response()->json(['error' => 'Popup not found'], 404);
         }
-        $user_id = $popup->user_id;
-        $websiteName = $popup->website_name;
+        $status = $popup->status;
         $content = $popup->content;
 
         $doc = new DOMDocument();
@@ -105,14 +133,15 @@ class PopupContentController extends Controller
         $bodyContent = $bodyContentDiv ? $bodyContentDiv->nodeValue : '';
 
         return response()->json([
-            'popup_id' => $popid,
+            'popup_id' => Crypt::decryptString($popId),
             'header_text' => $headerText,
             'logo_url' => $logoUrl,
-            'body_content' => $bodyContent
+            'body_content' => $bodyContent,
+            'status' => $status
         ]);
     }
 
-    public function savePopupData(Request $request)
+    public function managePopupFormData(Request $request)
     {
         $validatedData = $request->validate([
             'popup_id' => 'required|integer|exists:table_popup_content,id',
@@ -136,8 +165,9 @@ class PopupContentController extends Controller
         $userId = auth()->id();
         $websites = DB::table('table_popup_content')
             ->where('user_id', $userId)
-            ->pluck('website_name', 'id'); // Assuming 'websites' is a column that stores the website name
-            // $enc = new Crypt();
+            ->select('id', 'website_name', 'title', 'status')
+            ->get();
+        // $enc = new Crypt();
 
         return view('popup-content.list_popup', [
             'websites' => $websites,
@@ -145,9 +175,15 @@ class PopupContentController extends Controller
         ]);
     }
 
-    public function showPopupContent($id)
+    public function toggleStatus(Request $request, $id)
     {
-        $popup = DB::table('table_popup_content')->find($id);
-        return response()->json($popup);
+        $status = $request->input('status');
+
+        // Update the status in the database
+        DB::table('table_popup_content')
+            ->where('id', $id)
+            ->update(['status' => $status]);
+
+        return response()->json(['status' => 'success']);
     }
 }
