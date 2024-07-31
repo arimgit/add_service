@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\PopupContent;
 use App\Models\PopupFormData;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
@@ -23,9 +24,21 @@ class PopupContentController extends Controller
             'origin' => $origin
         ])->render();
 
+        $destinationPath = public_path('uploads/build/');
+
+        // Ensure the directory exists
+        if (!is_dir($destinationPath)) {
+            mkdir($destinationPath, 0755, true);
+        }
 
         // Write the file to the disk
         Storage::disk('js')->put("popup.js", $popupJs);
+
+        // Define the file path
+        $filePath = $destinationPath . 'popup.js';
+
+        // Write content to the file
+        file_put_contents($filePath, $popupJs);
 
         return response()->json(['message' => 'File written successfully']);
     }
@@ -62,8 +75,26 @@ class PopupContentController extends Controller
         $bodyText = $request->input('body_text');
 
         if ($request->hasFile('header_logo')) {
-            $logoPath = $request->file('header_logo')->store('logos', 'public');
-            $logoUrl = asset('storage/' . $logoPath);
+            // Validate the request
+            $request->validate([
+                'header_logo' => 'required|file|image|max:1', // Validation rules
+            ]);
+
+            // If validation passes, handle the file upload
+            $logFile = $request->file('header_logo');
+            $fileName = uniqid(time()) . '_' . $logFile->getClientOriginalName();
+            $destinationPath = public_path('uploads/logos/');
+
+            // Ensure the directory exists
+            if (!is_dir($destinationPath)) {
+                mkdir($destinationPath, 0755, true);
+            }
+
+            // Move the file to the desired directory
+            $logFile->move($destinationPath, $fileName);
+
+            // Build the URL to access the file
+            $logoUrl = asset('uploads/logos/' . $fileName);
         } else {
             $logoPath = 'default_storage/building-icon.svg';
             $logoUrl = asset($logoPath);
@@ -106,6 +137,8 @@ class PopupContentController extends Controller
         header("Access-Control-Allow-Headers: *");
         header("Access-Control-Allow-Methods: *");
         header("Allow: *");
+
+        Cookie::queue('name', 'value', 60);
 
         $popup = PopupContent::find(Crypt::decryptString($popId));
 

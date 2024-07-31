@@ -1,4 +1,5 @@
 (function () {
+    const cookieName = "check_popup";
     function fetchPopupData(popId) {
         fetch(`{{$origin}}/popup/data/${popId}`)
             .then(response => response.json())
@@ -63,6 +64,7 @@
             // Find the overlay element and hide it or remove it
             const overlay = document.getElementById('overlay');
             overlay.style.display = 'none'; // or overlay.remove();
+            preventPopup();
         });
 
     }
@@ -85,6 +87,7 @@
             .then(data => {
                 if (data.success) {
                     document.getElementById('overlay').style.display = 'none';
+                    preventPopup();
                 } else {
                     console.log('An error occurred: ' + data.error);
                 }
@@ -103,12 +106,74 @@
         return null;
     }
 
-    window.onload = function () {
-        const popId = getScriptTagAttribute();
-        if (popId) {
-            fetchPopupData(popId);
-        } else {
-            console.error('No pop id found in the script tag');
+    // Function to generate a unique identifier (UUID)
+    function generateUniqueValue() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
+    // Function to set a cookie with an expiration timestamp
+    function setCookie(name, value, days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        var expires = "expires=" + date.toUTCString();
+        var expirationTimestamp = Math.floor(date.getTime() / 1000); // Store expiration as a Unix timestamp
+        var cookieValue = JSON.stringify({
+            value: value,
+            expires: expirationTimestamp
+        });
+        document.cookie = name + "=" + encodeURIComponent(cookieValue) + ";" + expires + ";path=/";
+    }
+
+    // Function to retrieve a cookie value and parse its JSON content
+    function getCookie(name) {
+        var nameEQ = name + "=";
+        var ca = document.cookie.split(';');
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) === ' ') c = c.substring(1);
+            if (c.indexOf(nameEQ) === 0) {
+                var cookieData = decodeURIComponent(c.substring(nameEQ.length, c.length));
+                return JSON.parse(cookieData);
+            }
         }
+        return null;
+    }
+
+    // Function to check if a cookie has expired
+    function isCookieExpired(cookie) {
+        if (!cookie) return true; // Cookie does not exist or is not valid
+        var now = Math.floor(new Date().getTime() / 1000); // Current Unix timestamp
+        return now > cookie.expires;
+    }
+
+    // Function to handle the cookie logic
+    function handleCookie() {
+
+        var cookie = getCookie(cookieName);
+        if (cookie && !isCookieExpired(cookie)) {
+            // Cookie exists and is not expired
+            // console.log("Cookie exists with value:", cookie.value);
+        } else {
+            const popId = getScriptTagAttribute();
+            if (popId) {
+                fetchPopupData(popId);
+            } else {
+                console.error('No pop id found in the script tag');
+            }
+        }
+    }
+
+    function preventPopup() {
+        var newCookieValue = generateUniqueValue();
+        setCookie(cookieName, newCookieValue, 7); // Set cookie to expire in 7 days
+        // console.log("New cookie set with value:", newCookieValue);
+    }
+
+    // Execute the cookie handling logic when the page loads
+    window.onload = function () {
+        handleCookie();
     };
 })();

@@ -63,7 +63,7 @@
         // Copy script tag event
         $('.js-copy-tag').on('click', function() {
             var $copyIcon = $(this);
-            var scriptTag = `<script type="text\/javascript" src="${window.location.origin}/storage/build/popup.js?attr=${$copyIcon.attr('enc')}" charset="UTF-8"><\/script>`;
+            var scriptTag = `<script type="text\/javascript" src="${window.location.origin}/uploads/build/popup.js?attr=${$copyIcon.attr('enc')}" charset="UTF-8"><\/script>`;
             const tempTextArea = document.createElement('textarea');
             tempTextArea.value = scriptTag;
             document.body.appendChild(tempTextArea);

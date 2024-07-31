@@ -12,7 +12,7 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
@@ -41,11 +41,6 @@
 
     <div class="container d-flex">
         <div style="flex: 1; margin-right: 20px;">
-            @if(session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
-            @endif
             <main>
                 @yield('content')
             </main>
@@ -56,6 +51,34 @@
         <p>&copy; {{ date('Y') }} My Application. All rights reserved.</p>
     </footer>
     <!-- Add your JavaScript files here -->
+    <script>
+        @if(session('success'))
+            Swal.fire({
+                icon: "success",
+                title: "{{ session('success') }}",
+                showConfirmButton: false,
+                timer: 2000
+            });
+        @endif
+        @if(session('error'))
+            Swal.fire({
+                icon: "error",
+                title: "{{ session('error') }}",
+                showConfirmButton: false,
+                timer: 2000
+            });
+        @endif
+        @if ($errors->any())
+            @foreach ($errors->all() as $error)
+                Swal.fire({
+                    icon: "error",
+                    title: "{{ $error }}",
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+            @endforeach
+        @endif
+    </script>
 </body>
 
 </html>
