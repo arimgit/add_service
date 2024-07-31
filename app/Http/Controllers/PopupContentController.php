@@ -77,7 +77,7 @@ class PopupContentController extends Controller
         if ($request->hasFile('header_logo')) {
             // Validate the request
             $request->validate([
-                'header_logo' => 'required|file|image|max:1', // Validation rules
+                'header_logo' => 'required|file|image|max:2048', // Validation rules
             ]);
 
             // If validation passes, handle the file upload
