@@ -96,8 +96,20 @@ class PopupContentController extends Controller
             // Build the URL to access the file
             $logoUrl = asset('uploads/logos/' . $fileName);
         } else {
-            $logoPath = 'default_storage/building-icon.svg';
-            $logoUrl = asset($logoPath);
+            if ($popupId) {
+                $popup = PopupContent::find($popupId);
+                $content = $popup->content;
+
+                $doc = new DOMDocument();
+                libxml_use_internal_errors(true);
+                $doc->loadHTML($content);
+                libxml_clear_errors();
+                $logoImg = $doc->getElementById('previewLogo');
+                $logoUrl = $logoImg ? $logoImg->getAttribute('src') : '';
+            } else {
+                $logoPath = 'default_storage/building-icon.svg';
+                $logoUrl = asset($logoPath);
+            }
         }
 
         $popupHtml = view('popup-content.popup_template', [
@@ -127,6 +139,7 @@ class PopupContentController extends Controller
                 'type' => 'popup',
             ]);
         }
+        $request->session()->flash('success', 'Your data has been saved successfully!');
 
         return redirect()->route('ad_web_manage_popup', ['popupId' => $popup->id]);
     }
@@ -218,5 +231,17 @@ class PopupContentController extends Controller
             ->update(['status' => $status]);
 
         return response()->json(['status' => 'success']);
+    }
+
+    public function viewLead($popupId)
+    {
+        // Fetch all records from the PopupFormData table
+        $viewLead = PopupFormData::where('popup_id', $popupId)->get();
+        $popupContent = PopupContent::find($popupId);
+        // Pass the data to the view
+        return view('popup-content.popup_form_data_list', [
+            'viewLead' => $viewLead,
+            'popupContent' => $popupContent
+        ]);
     }
 }

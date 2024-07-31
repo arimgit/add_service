@@ -36,3 +36,4 @@ Route::post('/toggle/status/{id}', [PopupContentController::class, 'toggleStatus
 // API ROUTER
 Route::post('api/manage/popup/formdata', [PopupContentController::class, 'managePopupFormData'])->name('api_manage_popup_formdata');
 Route::get('/build/popup/js', [PopupContentController::class, 'buildPopupJs'])->name('build_popup_js');
+Route::get('/view/lead/{popupId}', [PopupContentController::class, 'viewLead'])->name('api_view_lead');

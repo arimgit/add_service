@@ -9,8 +9,9 @@
         <tr>
             <th>Website</th>
             <th>Title</th>
-            <th>Action</th>
             <th>Status</th>
+            <th>Action</th>
+            <th>View Lead</th>
         </tr>
     </thead>
     <tbody>
@@ -19,18 +20,22 @@
             <td>{{ $website->website_name }}</td>
             <td>{{ $website->title }}</td>
             <td>
-                <a href="{{ route('ad_web_manage_popup', ['popupId' => $website->id]) }}"><i class="fa fa-pencil"></i></a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-                <i class="fa-solid fa-copy js-copy-tag" data-id="{{ $website->id }}" enc="{{$enc::encryptString($website->id)}}"></i>
-            </td>
-            <td>
                 <button type="button" class="js-toggle-status btn btn-sm {{ $website->status == 'active' ? 'btn-success' : 'btn-danger' }}" data-id="{{ $website->id }}" data-status="{{ $website->status }}">
                     {{ $website->status == 'active' ? 'On' : 'Off' }}
                 </button>
+            </td>
+            <td>
+                <a href="{{ route('ad_web_manage_popup', ['popupId' => $website->id]) }}" title="Manage Popup"><i class="fa fa-pencil"></i></a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+                <i class="fa-solid fa-copy js-copy-tag" data-id="{{ $website->id }}" enc="{{$enc::encryptString($website->id)}}" title="Copy Script"></i>
+            </td>
+            <td>
+                <a href="{{ route('api_view_lead', ['popupId' => $website->id]) }}" title="View Lead"><i class="fa fa-eye"></i></a>
             </td>
         </tr>
         @endforeach
     </tbody>
 </table>
+<a href="mailto:abc@g.c">Send Email</a>
 <script>
     $(document).ready(function() {
         // Toggle status button click event
