@@ -209,24 +209,15 @@ class PopupContentController extends Controller
     public function listPopup(Crypt $enc, Request $request)
     {
         $userId = auth()->id();
-        $sortColumn = $request->get('sort', 'created_at'); // Default sort column
-        $sortDirection = $request->get('direction', 'asc'); // Default sort direction
-        $allowedSortColumns = ['website_name', 'title', 'status', 'created_at'];
-        if (!in_array($sortColumn, $allowedSortColumns)) {
-            $sortColumn = 'created_at';
-        }
         $websites = DB::table('table_popup_content')
             ->where('user_id', $userId)
             ->select('id', 'website_name', 'title', 'status')
-            ->orderBy($sortColumn, $sortDirection)
             ->get();
         // $enc = new Crypt();
 
         return view('popup-content.list_popup', [
             'websites' => $websites,
             'enc' => $enc,
-            'sortColumn' => $sortColumn,
-            'sortDirection' => $sortDirection,
         ]);
     }
 

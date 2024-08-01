@@ -5,7 +5,7 @@
 @section('content')
 <div class="container" style="max-width: 900px; margin: 20px auto; padding: 20px; background-color: #fff; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); border-radius: 8px;">
     @if ($popupContent)
-        <h1 style="margin-top: 0; color: #333;">{{ $popupContent->website_name }}: {{ $popupContent->title }}</h1>
+        <h1 style="margin-top: 0; color: #333;">{{ $popupContent->title }}: {{ $popupContent->website_name }}</h1>
     @endif
 
     <!-- Display form data -->

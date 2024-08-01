@@ -14,6 +14,9 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.datatables.net/2.1.2/js/dataTables.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.1.2/css/dataTables.dataTables.css" />
+
 </head>
 
 <body style="font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh;">
@@ -52,6 +55,8 @@
     </footer>
     <!-- Add your JavaScript files here -->
     <script>
+        import DataTable from 'datatables.net-dt';
+        import 'datatables.net-responsive-dt';
         @if(session('success'))
             Swal.fire({
                 icon: "success",

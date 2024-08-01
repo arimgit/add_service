@@ -5,17 +5,8 @@
 
 @section('content')
 <div class="sorting-options" style="text-align: right; margin-bottom: 20px;">
-    <label for="sort-dropdown">Sort by: </label>
-    <select id="sort-dropdown" class="form-select" style="display: inline-block; width: auto;">
-        <option value="{{ route('ad_web_list_popup', ['sort' => 'website_name', 'direction' => 'asc']) }}" {{ $sortColumn == 'website_name' && $sortDirection == 'asc' ? 'selected' : '' }}>Website Name A-Z</option>
-        <option value="{{ route('ad_web_list_popup', ['sort' => 'website_name', 'direction' => 'desc']) }}" {{ $sortColumn == 'website_name' && $sortDirection == 'desc' ? 'selected' : '' }}>Website Name Z-A</option>
-        <option value="{{ route('ad_web_list_popup', ['sort' => 'title', 'direction' => 'asc']) }}" {{ $sortColumn == 'title' && $sortDirection == 'asc' ? 'selected' : '' }}>Title A-Z</option>
-        <option value="{{ route('ad_web_list_popup', ['sort' => 'title', 'direction' => 'desc']) }}" {{ $sortColumn == 'title' && $sortDirection == 'desc' ? 'selected' : '' }}>Title Z-A</option>
-        <option value="{{ route('ad_web_list_popup', ['sort' => 'created_at', 'direction' => 'desc']) }}" {{ $sortColumn == 'created_at' && $sortDirection == 'desc' ? 'selected' : '' }}>Created At (Newest)</option>
-        <option value="{{ route('ad_web_list_popup', ['sort' => 'created_at', 'direction' => 'asc']) }}" {{ $sortColumn == 'created_at' && $sortDirection == 'asc' ? 'selected' : '' }}>Created At (Oldest)</option>
-    </select>
 </div>
-<table class="table">
+<table class="table display" id="listTable">
     <thead>
         <tr style="text-align: center;">
             <th>Website</th>
@@ -93,10 +84,9 @@
             });
 
         });
-
-        $('#sort-dropdown').on('change', function() {
-            var selectedUrl = $(this).val();
-            window.location.href = selectedUrl;
+ 
+        let table = new DataTable('#listTable', {
+            responsive: true
         });
     });
 </script>
