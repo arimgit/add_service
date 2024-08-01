@@ -15,7 +15,7 @@
                 <tr>
                     <th style="padding: 10px; border: 1px solid #ddd; background-color: #f4f4f4;">S.No</th>
                     <th style="padding: 10px; border: 1px solid #ddd; background-color: #f4f4f4;">Host Name</th>
-                    <th style="padding: 10px; border: 1px solid #ddd; background-color: #f4f4f4;">Form Data</th>
+                    <th style="padding: 10px; border: 1px solid #ddd; background-color: #f4f4f4;">Lead Data</th>
                 </tr>
             </thead>
             <tbody>
@@ -27,7 +27,13 @@
                             <div>
                                 @if (is_array($dataArray = $data->form_data))
                                     @foreach ($dataArray as $key => $value)
+                                    @if ($key === 'email')
+                                        <strong>{{ $key }}:</strong> <a href="mailto:{{ $value }}">{{ $value }}</a>
+                                    @elseif ($key === 'mobile')
+                                        <strong>{{ $key }}:</strong> <a href="tel:{{ $value }}">{{ $value }}</a>
+                                    @else
                                         <strong>{{ $key }}:</strong> {{ $value }}
+                                    @endif
                                     <br>
                                     @endforeach
                                 @else
@@ -40,7 +46,7 @@
             </tbody>
         </table>
     @else
-        <p>No form data available.</p>
+        <p>No Lead data available.</p>
     @endif
 </div>
 @endsection

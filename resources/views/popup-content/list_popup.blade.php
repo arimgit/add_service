@@ -4,9 +4,20 @@
 @section('title', 'List Popup')
 
 @section('content')
+<div class="sorting-options" style="text-align: right; margin-bottom: 20px;">
+    <label for="sort-dropdown">Sort by: </label>
+    <select id="sort-dropdown" class="form-select" style="display: inline-block; width: auto;">
+        <option value="{{ route('ad_web_list_popup', ['sort' => 'website_name', 'direction' => 'asc']) }}" {{ $sortColumn == 'website_name' && $sortDirection == 'asc' ? 'selected' : '' }}>Website Name A-Z</option>
+        <option value="{{ route('ad_web_list_popup', ['sort' => 'website_name', 'direction' => 'desc']) }}" {{ $sortColumn == 'website_name' && $sortDirection == 'desc' ? 'selected' : '' }}>Website Name Z-A</option>
+        <option value="{{ route('ad_web_list_popup', ['sort' => 'title', 'direction' => 'asc']) }}" {{ $sortColumn == 'title' && $sortDirection == 'asc' ? 'selected' : '' }}>Title A-Z</option>
+        <option value="{{ route('ad_web_list_popup', ['sort' => 'title', 'direction' => 'desc']) }}" {{ $sortColumn == 'title' && $sortDirection == 'desc' ? 'selected' : '' }}>Title Z-A</option>
+        <option value="{{ route('ad_web_list_popup', ['sort' => 'created_at', 'direction' => 'desc']) }}" {{ $sortColumn == 'created_at' && $sortDirection == 'desc' ? 'selected' : '' }}>Created At (Newest)</option>
+        <option value="{{ route('ad_web_list_popup', ['sort' => 'created_at', 'direction' => 'asc']) }}" {{ $sortColumn == 'created_at' && $sortDirection == 'asc' ? 'selected' : '' }}>Created At (Oldest)</option>
+    </select>
+</div>
 <table class="table">
     <thead>
-        <tr>
+        <tr style="text-align: center;">
             <th>Website</th>
             <th>Title</th>
             <th>Status</th>
@@ -16,7 +27,7 @@
     </thead>
     <tbody>
         @foreach($websites as $website)
-        <tr>
+        <tr style="text-align: center;">
             <td>{{ $website->website_name }}</td>
             <td>{{ $website->title }}</td>
             <td>
@@ -35,7 +46,6 @@
         @endforeach
     </tbody>
 </table>
-<a href="mailto:abc@g.c">Send Email</a>
 <script>
     $(document).ready(function() {
         // Toggle status button click event
@@ -82,6 +92,11 @@
                 timer: 1500
             });
 
+        });
+
+        $('#sort-dropdown').on('change', function() {
+            var selectedUrl = $(this).val();
+            window.location.href = selectedUrl;
         });
     });
 </script>

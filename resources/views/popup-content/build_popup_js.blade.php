@@ -32,12 +32,15 @@
                         <form method='post' id='popupForm' style='margin-top: 20px;'>
                             <div style='margin-bottom: 15px;'>
                                 <input type='text' name='name' autocomplete='name' style='width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;' placeholder='Name' required>
+                                <span class="error-message" style="color: red; display: none; text-align: left;">Please enter a valid name.</span>
                             </div>
                             <div style='margin-bottom: 15px;'>
                                 <input type='text' name='email' autocomplete='email' style='width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;' placeholder='Email' required>
+                                <span class="error-message" style="color: red; display: none; text-align: left;">Please enter a valid email address.</span>
                             </div>
                             <div style='margin-bottom: 15px;'>
                                 <input type='text' name='mobile' autocomplete='mobile' style='width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;' placeholder='Phone' required>
+                                <span class="error-message" style="color: red; display: none; text-align: left;">Please enter a valid mobile number.</span>
                             </div>
                             <input type='submit' value='Submit' name='save' style='width: 40%; padding: 10px; background-color: #007bff; border: none; color: #fff; font-size: 16px; border-radius: 4px; cursor: pointer;'>
                         </form>
@@ -54,7 +57,9 @@
             formData.append('host_name', window.location.origin);
             var formObject = {};
             formData.forEach((value, key) => { formObject[key] = value });
-            submitForm(formObject);
+            if (validateForm(formObject)) {
+                submitForm(formObject);
+            }
         });
 
         const closeButton = document.querySelector('.close-btn');
@@ -67,6 +72,48 @@
             preventPopup();
         });
 
+    }
+
+    function validateForm(formObject) {
+        let isValid = true;
+
+        const name = formObject.name;
+        const email = formObject.email;
+        const mobile = formObject.mobile;
+
+        // Clear previous error messages
+        document.querySelectorAll('.error-message').forEach(function (el) {
+            el.style.display = 'none';
+        });
+
+        // Validate name
+        if (!name || name.trim().length === 0) {
+            showError('name', 'Please enter a valid name.');
+            isValid = false;
+        }
+
+        // Validate email using regex
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email || !emailPattern.test(email)) {
+            showError('email', 'Please enter a valid email address.');
+            isValid = false;
+        }
+
+        // Validate mobile using regex (simple validation for demonstration purposes)
+        const mobilePattern = /^\+?\d{10}$/;
+        if (!mobile || !mobilePattern.test(mobile)) {
+            showError('mobile', 'Please enter a valid phone number.');
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    function showError(fieldName, message) {
+        const input = document.querySelector(`[name=${fieldName}]`);
+        const errorMessage = input.parentElement.querySelector('.error-message');
+        errorMessage.innerText = message;
+        errorMessage.style.display = 'block';
     }
 
     function submitForm(formObject) {
