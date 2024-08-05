@@ -55,8 +55,6 @@
     </footer>
     <!-- Add your JavaScript files here -->
     <script>
-        import DataTable from 'datatables.net-dt';
-        import 'datatables.net-responsive-dt';
         @if(session('success'))
             Swal.fire({
                 icon: "success",

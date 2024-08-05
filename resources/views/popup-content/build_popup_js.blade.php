@@ -24,7 +24,7 @@
                 <div id='popup' style='max-width: 400px; margin: 20px auto; background-color: #ffffff; box-shadow: 0 0 10px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; position: relative; top: 50%; transform: translateY(-50%); z-index: 1000;'>
                     <button style='position: absolute; top: 0px; right: 10px; font-size: 20px; color: #e71e1e; background: #fff; border: none; outline: none; cursor: pointer;' class="close-btn">&times;</button>
                     <header id='previewHeader' style='background-color: #ffffff; padding: 10px; text-align: center;'>
-                        <span id='previewHeaderText'>${data.header_text}</span>
+                        <span id='previewHeaderText' style='font-size:larger; font-weight:bold;'>${data.header_text}</span>
                     </header>
                     <img id='previewLogo' src='${data.logo_url}' alt='default logo' style='border-radius: 50%; max-height: 50px; display: block; margin: 10px auto;'>
                     <div id='previewBody' style='padding: 20px; text-align: center;'>
