@@ -29,7 +29,7 @@
             <label for="body_text" style="display: block; margin-bottom: 5px; font-weight: bold;">Body Content:</label>
             <textarea id="body_text" name="body_text" style="width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;" required>{{ $bodyText ?? old('body_text') }}</textarea>
         </div>
-        <button type="submit" formaction="{{ route('ad_web_popup_create') }}" formmethod="post" style="width: 100%; padding: 10px; background-color: #28a745; border: none; color: #fff; font-size: 16px; border-radius: 4px; cursor: pointer; margin-top: 10px;">
+        <button type="submit" formaction="{{ route('ad_web_manage_popup', ['popupId' => $popup->id ?? -1]) }}" formmethod="post" style="width: 100%; padding: 10px; background-color: #28a745; border: none; color: #fff; font-size: 16px; border-radius: 4px; cursor: pointer; margin-top: 10px;">
             {{ $popup ? 'Update Popup' : 'Create Popup' }}
         </button>
     </form>

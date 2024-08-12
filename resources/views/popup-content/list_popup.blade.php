@@ -96,7 +96,7 @@
                         <input type="checkbox" class="js-toggle-status" data-id="{{ $website->id }}" data-status="{{ $website->status }}" {{ $website->status == 'active' ? 'checked' : '' }}>
                         <span class="slider round"></span>
                     </label>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-                    <a href="{{ route('api_view_lead', ['popupId' => $website->id]) }}" title="View Lead"><i class="fa fa-eye"></i></a>
+                    <a href="{{ route('api_view_lead', ['popupId' => $website->id]) }}" title="View Lead ({{ $website->lead_count }})"><i class="fa fa-eye"></i></a>
                     
                 </td>
             </tr>
@@ -119,9 +119,9 @@
                         status: newStatus
                     },
                     success: function(response) {
-                        if (response.status === 'success') {
+                        /*if (response.status === 'success') {
                             console.log('Status updated successfully.');
-                        }
+                        }*/
                     }
                 });
             });

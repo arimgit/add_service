@@ -22,8 +22,8 @@ Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout.post');
 Route::middleware('auth')->group(function () {
-    Route::get('/manage/popup/{popupId?}', [PopupContentController::class, 'managePopup'])->name('ad_web_manage_popup');
-    Route::post('/popup/create', [PopupContentController::class, 'create'])->name('ad_web_popup_create');
+    Route::match(['get', 'post'], '/manage/popup/{popupId?}', [PopupContentController::class, 'managePopup'])->name('ad_web_manage_popup');
+    //Route::post('/popup/create', [PopupContentController::class, 'create'])->name('ad_web_popup_create');
 });
 
 // WEB ROUTER

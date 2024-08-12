@@ -45,12 +45,99 @@ class PopupContentController extends Controller
 
     public function managePopup(Request $request, $popupId = -1)
     {
-        $popup = PopupContent::find($popupId);
-        $doc = new \DOMDocument();
-        @$doc->loadHTML($popup->content);
-        $headerText = $doc->getElementById('previewHeaderText')->textContent ?? '';
-        $bodyText = $doc->getElementById('previewContent')->textContent ?? '';
+        // Initialize variables
+        $popup = $popupId != -1 ? PopupContent::find($popupId) : null;
+        $headerText = '';
+        $bodyText = '';
+        $logoUrl = '';
+
+        if ($popup) {
+            // If popup exists, parse its content
+            $doc = new \DOMDocument();
+            @$doc->loadHTML($popup->content);
+            $headerText = $doc->getElementById('previewHeaderText')->textContent ?? '';
+            $bodyText = $doc->getElementById('previewContent')->textContent ?? '';
+            $logoImg = $doc->getElementById('previewLogo');
+            $logoUrl = $logoImg ? $logoImg->getAttribute('src') : '';
+        }
+
+        if ($request->isMethod('post')) {
+            // Handle form submission
+            $request->validate([
+                'website_name' => 'required|string|max:255',
+                'title' => 'required|string|max:255',
+                'header_text' => 'required|string|max:255',
+                'body_text' => 'required|string',
+                'popup_id' => 'nullable|exists:table_popup_content,id'
+            ]);
+
+            $websiteName = $request->input('website_name');
+            $title = $request->input('title');
+            $headerText = $request->input('header_text');
+            $bodyText = $request->input('body_text');
+
+            if ($request->hasFile('header_logo')) {
+                $request->validate([
+                    'header_logo' => 'required|file|image|max:2048', // Validation rules
+                ]);
+
+                $logFile = $request->file('header_logo');
+                $fileName = uniqid(time()) . '_' . $logFile->getClientOriginalName();
+                $destinationPath = public_path('uploads/logos/');
+
+                if (!is_dir($destinationPath)) {
+                    mkdir($destinationPath, 0755, true);
+                }
+
+                $logFile->move($destinationPath, $fileName);
+                $logoUrl = asset('uploads/logos/' . $fileName);
+            } else {
+                if ($popupId != -1) {
+                    $doc = new \DOMDocument();
+                    libxml_use_internal_errors(true);
+                    $doc->loadHTML($popup->content);
+                    libxml_clear_errors();
+                    $logoImg = $doc->getElementById('previewLogo');
+                    $logoUrl = $logoImg ? $logoImg->getAttribute('src') : '';
+                } else {
+                    $logoPath = 'default_storage/building-icon.svg';
+                    $logoUrl = asset($logoPath);
+                }
+            }
+
+            $popupHtml = view('popup-content.popup_template', [
+                'headerText' => $headerText,
+                'logoUrl' => $logoUrl,
+                'bodyText' => $bodyText
+            ])->render();
+
+            if ($popupId != -1) {
+                // Update existing popup
+                if ($popup) {
+                    $popup->update([
+                        'website_name' => $websiteName,
+                        'title' => $title,
+                        'content' => $popupHtml,
+                        'type' => 'popup',
+                    ]);
+                }
+            } else {
+                // Create new popup
+                $popup = PopupContent::create([
+                    'user_id' => Auth::id(),
+                    'website_name' => $websiteName,
+                    'title' => $title,
+                    'content' => $popupHtml,
+                    'type' => 'popup',
+                ]);
+            }
+            
+            $request->session()->flash('success', 'Your data has been saved successfully!');
+        }
+
+        // Encrypt popupId for view
         $encryptedPopupId = Crypt::encryptString($popupId);
+
         return view('popup-content.manage_popup', [
             'popup' => $popup,
             'headerText' => $headerText,
@@ -59,90 +146,6 @@ class PopupContentController extends Controller
         ]);
     }
 
-    public function create(Request $request)
-    {
-        $request->validate([
-            'website_name' => 'required|string|max:255',
-            'title' => 'required|string|max:255',
-            'header_text' => 'required|string|max:255',
-            'body_text' => 'required|string',
-            'popup_id' => 'nullable|exists:table_popup_content,id'
-        ]);
-        $popupId = $request->input('popup_id');
-        $websiteName = $request->input('website_name');
-        $title = $request->input('title');
-        $headerText = $request->input('header_text');
-        $bodyText = $request->input('body_text');
-
-        if ($request->hasFile('header_logo')) {
-            // Validate the request
-            $request->validate([
-                'header_logo' => 'required|file|image|max:2048', // Validation rules
-            ]);
-
-            // If validation passes, handle the file upload
-            $logFile = $request->file('header_logo');
-            $fileName = uniqid(time()) . '_' . $logFile->getClientOriginalName();
-            $destinationPath = public_path('uploads/logos/');
-
-            // Ensure the directory exists
-            if (!is_dir($destinationPath)) {
-                mkdir($destinationPath, 0755, true);
-            }
-
-            // Move the file to the desired directory
-            $logFile->move($destinationPath, $fileName);
-
-            // Build the URL to access the file
-            $logoUrl = asset('uploads/logos/' . $fileName);
-        } else {
-            if ($popupId) {
-                $popup = PopupContent::find($popupId);
-                $content = $popup->content;
-
-                $doc = new DOMDocument();
-                libxml_use_internal_errors(true);
-                $doc->loadHTML($content);
-                libxml_clear_errors();
-                $logoImg = $doc->getElementById('previewLogo');
-                $logoUrl = $logoImg ? $logoImg->getAttribute('src') : '';
-            } else {
-                $logoPath = 'default_storage/building-icon.svg';
-                $logoUrl = asset($logoPath);
-            }
-        }
-
-        $popupHtml = view('popup-content.popup_template', [
-            'headerText' => $headerText,
-            'logoUrl' => $logoUrl,
-            'bodyText' => $bodyText
-        ])->render();
-
-        if ($popupId) {
-            // Update existing popup
-            $popup = PopupContent::find($popupId);
-            if ($popup) {
-                $popup->update([
-                    'website_name' => $websiteName,
-                    'title' => $title,
-                    'content' => $popupHtml,
-                    'type' => 'popup',
-                ]);
-            }
-        } else {
-            // Create new popup
-            $popup = PopupContent::create([
-                'user_id' => Auth::id(),
-                'website_name' => $websiteName,
-                'title' => $title,
-                'content' => $popupHtml,
-                'type' => 'popup',
-            ]);
-        }
-        $request->session()->flash('success', 'Your data has been saved successfully!');
-
-        return redirect()->route('ad_web_manage_popup', ['popupId' => $popup->id]);
-    }
 
     public function getPopupData($popId)
     {
@@ -210,10 +213,13 @@ class PopupContentController extends Controller
     {
         $userId = auth()->id();
         $websites = DB::table('table_popup_content')
-            ->where('user_id', $userId)
-            ->select('id', 'website_name', 'title', 'status')
-            ->get();
-        // $enc = new Crypt();
+        ->leftJoin('popup_form_data', 'table_popup_content.id', '=', 'popup_form_data.popup_id')
+        ->where('table_popup_content.user_id', $userId)
+        ->select('table_popup_content.id', 'table_popup_content.website_name', 'table_popup_content.title', 'table_popup_content.status', DB::raw('COUNT(popup_form_data.id) as lead_count'))
+        ->groupBy('table_popup_content.id', 'table_popup_content.website_name', 'table_popup_content.title', 'table_popup_content.status')
+        ->get();
+
+        $request->session()->forget('success');
 
         return view('popup-content.list_popup', [
             'websites' => $websites,
